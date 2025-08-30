@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rainfall Prediction</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom, #87CEEB, #f0f8ff);
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      text-align: center;
+      max-width: 420px;
+      width: 92%;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 26px;
+      color: #333;
+    }
+    input, button {
+      padding: 12px;
+      width: 100%;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+      transition: background 0.25s ease;
+      border: none;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .result {
+      margin-top: 16px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      min-height: 28px;
+    }
+    .weather-icon {
+      font-size: 50px;
+      margin-top: 10px;
+      height: 56px;
+    }
+    .rain { color: #1e90ff; }
+    .no-rain { color: #28a745; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌦️ Rainfall Prediction</h1>
+    <form id="predictForm" onsubmit="return false;">
+      <input type="text" id="city" name="city" placeholder="Enter City Name (e.g. Lahore)" required>
+      <button type="button" onclick="predict()">Check Rainfall</button>
+    </form>
+    <div id="result" class="result"></div>
+    <div id="icon" class="weather-icon"></div>
+  </div>
+
+  <script>
+    async function predict() {
+      const city = document.getElementById("city").value.trim();
+      const outputDiv = document.getElementById("result");
+      const iconDiv = document.getElementById("icon");
+
+      if (!city) {
+        alert("Please enter a city");
+        return;
+      }
+
+      outputDiv.textContent = "⏳ Checking weather...";
+      iconDiv.innerHTML = "";
+
+      const formData = new FormData();
+      formData.append("city", city);
+
+      try {
+        const response = await fetch("/predict", {
+          method: "POST",
+          body: formData
+        });
+        const result = await response.json();
+
+        if (result.error) {
+          outputDiv.textContent = "❌ " + result.error;
+          iconDiv.innerHTML = "";
+          return;
+        }
+
+        if (result.prediction === 1) {
+          outputDiv.textContent = "🌧️ Rain Expected Tomorrow in " + result.city;
+          iconDiv.innerHTML = "<span class='rain'>☔</span>";
+        } else {
+          outputDiv.textContent = "☀️ No Rain Expected Tomorrow in " + result.city;
+          iconDiv.innerHTML = "<span class='no-rain'>🌞</span>";
+        }
+      } catch (err) {
+        outputDiv.textContent = "❌ Server Error: " + err;
+        iconDiv.innerHTML = "";
+      }
+    }
+  </script>
+</body>
+</html>
